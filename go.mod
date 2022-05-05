@@ -3,6 +3,7 @@ module github.com/infinimesh/inf
 go 1.18
 
 require (
+	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/infinimesh/infinimesh v0.0.0-20220505135621-2b6ee486add1
 	github.com/jedib0t/go-pretty/v6 v6.3.1
 	github.com/spf13/cobra v1.4.0
@@ -14,6 +15,7 @@ require (
 require (
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.3 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect

@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -24,15 +25,16 @@ import (
 	"os"
 	"strings"
 
+	MQTT "github.com/eclipse/paho.mqtt.golang"
 	"github.com/infinimesh/infinimesh/pkg/convert"
 	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
 	devpb "github.com/infinimesh/infinimesh/pkg/node/proto/devices"
 	shadowpb "github.com/infinimesh/infinimesh/pkg/shadow/proto"
 	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/structpb"
-
-	"github.com/spf13/cobra"
 )
 
 func makeDevicesServiceClient(ctx context.Context) (pb.DevicesServiceClient, error) {
@@ -331,7 +333,90 @@ var mgmtDevIceStateMQTTCmd = &cobra.Command{
 	Short: "Manage device state via MQTT",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
+		opts := MQTT.NewClientOptions()
+
+		broker, _ := cmd.Flags().GetString("host")
+		if broker == "" {
+			broker = strings.Replace(
+				strings.Split(viper.GetString("infinimesh"), ":")[0],
+				"api.", "mqtt.", 1)
+		}
+
+		port, _ := cmd.Flags().GetString("port")
+		if basic, _ := cmd.Flags().GetString("basic"); basic != "" {
+			cred := strings.Split(basic, ":")
+			opts.SetUsername(cred[0])
+			opts.SetPassword(cred[1])
+
+			if port == "" {
+				port = "1883"
+			}
+			broker = "mqtt://" + broker + ":" + port
+		} else {
+			cert_path, _ := cmd.Flags().GetString("crt")
+			if cert_path == "" {
+				return errors.New("no certificate given")
+			}
+			key_path, _ := cmd.Flags().GetString("key")
+			if key_path == "" {
+				return errors.New("no key given")
+			}
+
+			cert, err := tls.LoadX509KeyPair(cert_path, key_path)
+			if err != nil {
+				return err
+			}
+
+			opts.SetTLSConfig(&tls.Config{
+				Certificates: []tls.Certificate{cert},
+				ClientAuth: tls.NoClientCert,
+				ClientCAs: nil,
+				InsecureSkipVerify: true,
+			})
+
+			if port == "" {
+				port = "8883"
+			}
+			broker = "mqtts://" + broker + ":" + port
+		}
 		
+		opts.AddBroker(broker)
+
+		client_id, _ := cmd.Flags().GetString("client-id")
+		opts.SetClientID(client_id)
+		
+		fmt.Println(broker)
+
+		client := MQTT.NewClient(opts)
+		fmt.Println("Connecting to MQTT broker...")
+		if token := client.Connect(); token.Wait() && token.Error() != nil {
+			return token.Error()
+		}
+		fmt.Println("Connected")
+
+		desired, _ := cmd.Flags().GetBool("desired")
+		if desired {
+			fmt.Println("Subscribing to desired state")
+			messages := make(chan string, 2)
+			token := client.Subscribe("devices/+/state/desired/delta", 1, func(_ MQTT.Client, msg MQTT.Message) {
+				messages <- string(msg.Payload())
+			})
+
+			if token.Wait() && token.Error() != nil {
+				return token.Error()
+			}
+
+			for msg := range messages {
+				fmt.Println(msg)
+			}
+		}
+
+		report, _ := cmd.Flags().GetString("report")
+		if report != "" {
+			fmt.Println("Publishing to reported state")
+			client.Publish("devices/+/state/reported/delta", 1, false, report)
+			client.Disconnect(250)
+		}
 
 		return nil
 	},
@@ -421,13 +506,14 @@ func init() {
 	if err != nil {
 		hostname = fmt.Sprintf("infinimesh-cli-%d", os.Getpid())
 	}
-
-	mgmtDevIceStateMQTTCmd.Flags().String("crt", "", "Path to certificate file")
-	mgmtDevIceStateMQTTCmd.Flags().String("key", "", "Path to private key file")
-	mgmtDevIceStateMQTTCmd.Flags().String("ca", "", "Path to CA file")
-	mgmtDevIceStateMQTTCmd.Flags().String("host", "", "MQTT broker Host and Port(defaults to 8883 and to 1883 if basic auth is used")
-	mgmtDevIceStateMQTTCmd.Flags().String("basic", "", "MQTT Basic Auth string (login:pass)")
-	mgmtDevIceStateMQTTCmd.Flags().String("client-id", hostname, "MQTT client id")
+	
+	mgmtDevIceStateMQTTCmd.Flags().StringP("crt", "c", "", "Path to certificate file")
+	mgmtDevIceStateMQTTCmd.Flags().StringP("key", "k", "", "Path to private key file")
+	mgmtDevIceStateMQTTCmd.Flags().String("host", "", "MQTT broker Host and Port")
+	mgmtDevIceStateMQTTCmd.Flags().StringP("basic", "b", "", "MQTT Basic Auth string (login:pass)")
+	mgmtDevIceStateMQTTCmd.Flags().StringP("client-id", "i", hostname, "MQTT client id")
+	mgmtDevIceStateMQTTCmd.Flags().StringP("report", "r", "", "Report Device state")
+	mgmtDevIceStateMQTTCmd.Flags().BoolP("desired", "d", false, "Subscribe to Device Desired state")
 	mgmtDeviceStateCmd.AddCommand(mgmtDevIceStateMQTTCmd)
 
 	mgmtDeviceStateCmd.Flags().BoolP("delta", "d", false, "Wether to stream only delta")
