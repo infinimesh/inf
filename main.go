@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "github.com/infinimesh/infinimesh/cmd/inf/cmd"
+import "github.com/infinimesh/inf/cmd"
 
 var version string
 
