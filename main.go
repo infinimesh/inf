@@ -17,11 +17,6 @@ package main
 
 import "github.com/infinimesh/inf/cmd"
 
-var version string
-
 func main() {
-	if version == "" {
-		version = "dev"
-	}
-	cmd.Execute(version)
+	cmd.Execute()
 }

@@ -1,0 +1,146 @@
+# This is an example .goreleaser.yml file with some sensible defaults.
+# Make sure to check the documentation at https://goreleaser.com
+project_name: inf
+before:
+  hooks:
+    - go mod tidy
+builds:
+  - id: default
+    env:
+      - CGO_ENABLED=0
+    binary: inf
+    ldflags:
+      - -s -w -X github.com/infinimesh/inf/cmd.VERSION={{.Version}}
+    tags:
+      - infinimesh
+      - cli
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+archives:
+  - replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+    name_template: "inf_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    builds:
+      - default
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - LICENSE
+      - README.md
+      - examples/**/*
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+
+release:
+  mode: keep-existing
+  github:
+    owner: infinimesh
+    name: inf
+
+brews:
+  -
+    name: inf
+    homepage: "https://github.com/infinimesh/infinimesh"
+    license: "Apache-2.0"
+    description: "infinimesh Platform CLI"
+    caveats: "Start with inf help login ;)"
+    tap:
+      owner: infinimesh
+      name: homebrew-inf
+    commit_author:
+      name: slntopp
+      email: info@slnt-opp.xyz
+
+nfpms:
+  - package_name: inf
+    homepage: https://github.com/infinimesh/infinimesh
+    maintainer: slntopp info@slnt-opp.xyz
+    description: infinimesh Platform CLI
+    license: Apache 2.0
+    file_name_template: "{{ .ConventionalFileName }}"
+    builds:
+      - default
+    replacements:
+      amd64: 64-bit
+      386: 32-bit
+      darwin: macOS
+      linux: Tux
+
+    formats:
+      - deb
+      - rpm
+
+    dependencies:
+      - git
+
+    version_metadata: git
+    section: default
+    priority: extra
+
+aurs:
+  -
+    name: inf-bin
+
+    homepage: "https://github.com/infinimesh/infinimesh"
+    description: "infinimesh Platform CLI"
+
+    maintainers:
+      - 'Mikita Iwanowski <info@slnt-opp.xyz>'
+
+    contributors:
+      - 'Mikita Iwanowski <info@slnt-opp.xyz>'
+
+    license: "Apache-2.0"
+
+    private_key: '{{ .Env.AUR_KEY }}'
+
+    git_url: 'ssh://aur@aur.archlinux.org/inf-bin.git'
+
+    commit_author:
+      name: slntopp
+      email: info@slnt-opp.xyz
+
+# snapcrafts:
+#   - builds:
+#       - default
+#     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+#     replacements:
+#       amd64: 64-bit
+#       386: 32-bit
+#       darwin: macOS
+#       linux: Tux
+
+#     name: infinimesh
+#     publish: true
+#     summary: infinimesh Platform CLI
+#     description: Univeral CLI made with Cobra to work with infinimesh platform - local and remote.
+#     channel_templates:
+#       - edge
+#     grade: stable
+#     confinement: strict
+#     license: Apache-2.0
+#     base: core18
+#     apps:
+#       inf:
+#         plugs:
+#           - network
+#           - home
+      
