@@ -38,7 +38,7 @@ archives:
       windows: Windows
       386: i386
       amd64: x86_64
-    name_template: "inf_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    name_template: "inf_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{if .Arm}}v{{.Arm}}{{end}}"
     builds:
       - default
     format_overrides:
