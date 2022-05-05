@@ -16,8 +16,8 @@ jobs:
           go-version: 1.18
       - name: Install Snapcraft
         uses: samuelmeuli/action-snapcraft@v1
-        with:
-          snapcraft_token: ${{ secrets.SNAPCRAFT_TOKEN }}
+        # with:
+          # snapcraft_token: ${{ secrets.SNAPCRAFT_TOKEN }}
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
