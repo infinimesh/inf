@@ -384,19 +384,14 @@ var mgmtDevIceStateMQTTCmd = &cobra.Command{
 
 		client_id, _ := cmd.Flags().GetString("client-id")
 		opts.SetClientID(client_id)
-		
-		fmt.Println(broker)
 
 		client := MQTT.NewClient(opts)
-		fmt.Println("Connecting to MQTT broker...")
 		if token := client.Connect(); token.Wait() && token.Error() != nil {
 			return token.Error()
 		}
-		fmt.Println("Connected")
 
 		desired, _ := cmd.Flags().GetBool("desired")
 		if desired {
-			fmt.Println("Subscribing to desired state")
 			messages := make(chan string, 2)
 			token := client.Subscribe("devices/+/state/desired/delta", 1, func(_ MQTT.Client, msg MQTT.Message) {
 				messages <- string(msg.Payload())
@@ -413,7 +408,6 @@ var mgmtDevIceStateMQTTCmd = &cobra.Command{
 
 		report, _ := cmd.Flags().GetString("report")
 		if report != "" {
-			fmt.Println("Publishing to reported state")
 			client.Publish("devices/+/state/reported/delta", 1, false, report)
 			client.Disconnect(250)
 		}
