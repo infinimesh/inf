@@ -21,6 +21,7 @@ import (
 
 	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
 	accesspb "github.com/infinimesh/infinimesh/pkg/node/proto/access"
+	accpb "github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
 	nspb "github.com/infinimesh/infinimesh/pkg/node/proto/namespaces"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
@@ -66,6 +67,32 @@ var listNsCmd = &cobra.Command{
 	},
 }
 
+var joinsNsCmd = &cobra.Command{
+	Use: "joins",
+	Short: "List infinimesh Accounts with Access to the given Namespace",
+	Aliases: []string{"js", "permissions", "perms"},
+	Args: cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := makeContextWithBearerToken()
+		client, err := makeNamespacesServiceClient(ctx)
+		if err != nil {
+			return err
+		}
+
+		r, err := client.Joins(ctx, &nspb.Namespace{Uuid: args[0]})
+		if err != nil {
+			return err
+		}
+
+		if printJson, _ := cmd.Flags().GetBool("json"); printJson {
+			return printJsonResponse(r)
+		}
+
+		PrintNamespaceJoins(r.Accounts)
+		return nil
+	},
+}
+
 func PrintNamespacesPool(pool []*nspb.Namespace) {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
@@ -91,8 +118,34 @@ func PrintNamespacesPool(pool []*nspb.Namespace) {
 	t.Render()
 }
 
+func PrintNamespaceJoins(pool []*accpb.Account) {
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{"UUID", "Title", "Access"})
+	t.SetColumnConfigs([]table.ColumnConfig{
+		{ Number: 4, Hidden: true},
+	})
+
+	rows := make([]table.Row, len(pool))
+	for i, acc := range pool {
+		access := acc.Access.Level.String()
+		if acc.Access.Role == accesspb.Role_OWNER {
+			access += " (owner)"
+		}
+		rows[i] = table.Row{acc.Uuid, acc.Title, access, int(acc.Access.Level) + int(acc.Access.Role)}
+	}
+	t.AppendRows(rows)
+
+	t.SortBy([]table.SortBy{
+		{Number: 4, Mode: table.DscNumeric},
+	})
+	t.AppendFooter(table.Row{"", "Total Found", len(pool)}, table.RowConfig{AutoMerge: true})
+	t.Render()
+}
+
 func init() {
 	nsCmd.AddCommand(listNsCmd)
-
+	nsCmd.AddCommand(joinsNsCmd)
+	
 	rootCmd.AddCommand(nsCmd)
 }
