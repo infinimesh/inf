@@ -56,7 +56,7 @@ func makeShadowServiceClient(ctx context.Context) (pb.ShadowServiceClient, error
 // devicesCmd represents the devices command
 var devicesCmd = &cobra.Command{
 	Use:   "devices",
-	Short: "Manage infinimesh devices",
+	Short: "Manage infinimesh Devices",
 	Aliases: []string{"device", "dev"},
 	RunE: listDevicesCmd.RunE,
 }

@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/eclipse/paho.mqtt.golang v1.3.5
-	github.com/infinimesh/infinimesh v0.0.0-20220505135621-2b6ee486add1
+	github.com/infinimesh/infinimesh v0.0.0-20220507135648-db08bec40467
 	github.com/jedib0t/go-pretty/v6 v6.3.1
 	github.com/spf13/cobra v1.4.0
 	github.com/spf13/viper v1.10.1
