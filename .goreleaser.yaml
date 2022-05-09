@@ -124,29 +124,29 @@ aurs:
       name: slntopp
       email: info@slnt-opp.xyz
 
-# snapcrafts:
-#   - builds:
-#       - default
-#     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-#     replacements:
-#       amd64: 64-bit
-#       386: 32-bit
-#       darwin: macOS
-#       linux: Tux
+snapcrafts:
+  - builds:
+      - default
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    replacements:
+      amd64: 64-bit
+      386: 32-bit
+      darwin: macOS
+      linux: Tux
 
-#     name: infinimesh
-#     publish: true
-#     summary: infinimesh Platform CLI
-#     description: Univeral CLI made with Cobra to work with infinimesh platform - local and remote.
-#     channel_templates:
-#       - edge
-#     grade: stable
-#     confinement: strict
-#     license: Apache-2.0
-#     base: core18
-#     apps:
-#       inf:
-#         plugs:
-#           - network
-#           - home
+    name: infinimesh
+    publish: true
+    summary: infinimesh Platform CLI
+    description: Univeral CLI made with Cobra to work with infinimesh platform - local and remote.
+    channel_templates:
+      - edge
+    grade: stable
+    confinement: strict
+    license: Apache-2.0
+    base: core18
+    apps:
+      inf:
+        plugs:
+          - network
+          - home
       
