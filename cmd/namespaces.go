@@ -19,10 +19,10 @@ import (
 	"context"
 	"os"
 
-	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
-	accesspb "github.com/infinimesh/infinimesh/pkg/node/proto/access"
-	accpb "github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
-	nspb "github.com/infinimesh/infinimesh/pkg/node/proto/namespaces"
+	pb "github.com/infinimesh/proto/node"
+	accesspb "github.com/infinimesh/proto/node/access"
+	accpb "github.com/infinimesh/proto/node/accounts"
+	nspb "github.com/infinimesh/proto/node/namespaces"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 )
@@ -36,15 +36,15 @@ func makeNamespacesServiceClient(ctx context.Context) (pb.NamespacesServiceClien
 }
 
 var nsCmd = &cobra.Command{
-	Use: "namespaces",
-	Short: "Manage infinimesh Namespaces",
+	Use:     "namespaces",
+	Short:   "Manage infinimesh Namespaces",
 	Aliases: []string{"namespace", "ns"},
-	RunE: listNsCmd.RunE,
+	RunE:    listNsCmd.RunE,
 }
 
 var listNsCmd = &cobra.Command{
-	Use: "list",
-	Short: "List infinimesh Namespaces",
+	Use:     "list",
+	Short:   "List infinimesh Namespaces",
 	Aliases: []string{"ls", "l"},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := makeContextWithBearerToken()
@@ -68,10 +68,10 @@ var listNsCmd = &cobra.Command{
 }
 
 var joinsNsCmd = &cobra.Command{
-	Use: "joins",
-	Short: "List infinimesh Accounts with Access to the given Namespace",
+	Use:     "joins",
+	Short:   "List infinimesh Accounts with Access to the given Namespace",
 	Aliases: []string{"js", "permissions", "perms"},
-	Args: cobra.ExactArgs(1),
+	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := makeContextWithBearerToken()
 		client, err := makeNamespacesServiceClient(ctx)
@@ -98,7 +98,7 @@ func PrintNamespacesPool(pool []*nspb.Namespace) {
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"UUID", "Title", "Access"})
 	t.SetColumnConfigs([]table.ColumnConfig{
-		{ Number: 4, Hidden: true},
+		{Number: 4, Hidden: true},
 	})
 
 	rows := make([]table.Row, len(pool))
@@ -123,7 +123,7 @@ func PrintNamespaceJoins(pool []*accpb.Account) {
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"UUID", "Title", "Access"})
 	t.SetColumnConfigs([]table.ColumnConfig{
-		{ Number: 4, Hidden: true},
+		{Number: 4, Hidden: true},
 	})
 
 	rows := make([]table.Row, len(pool))
@@ -146,6 +146,6 @@ func PrintNamespaceJoins(pool []*accpb.Account) {
 func init() {
 	nsCmd.AddCommand(listNsCmd)
 	nsCmd.AddCommand(joinsNsCmd)
-	
+
 	rootCmd.AddCommand(nsCmd)
 }

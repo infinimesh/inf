@@ -28,8 +28,8 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 
-	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
-	accpb "github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
+	pb "github.com/infinimesh/proto/node"
+	accpb "github.com/infinimesh/proto/node/accounts"
 )
 
 func getVersion() string {
@@ -38,9 +38,9 @@ func getVersion() string {
 
 // contextCmd represents the context command
 var contextCmd = &cobra.Command{
-	Use:   "context",
+	Use:     "context",
 	Aliases: []string{"ctx"},
-	Short: "Print current infinimesh CLI Context | Aliases: ctx",
+	Short:   "Print current infinimesh CLI Context | Aliases: ctx",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		data := make(map[string]interface{})
 		data["version"] = getVersion()
@@ -69,9 +69,9 @@ var contextCmd = &cobra.Command{
 }
 
 var loginCmd = &cobra.Command{
-	Use:   "login",
+	Use:     "login",
 	Aliases: []string{"l", "auth", "a"},
-	Short: "Authorize in infinimesh and store credentials",
+	Short:   "Authorize in infinimesh and store credentials",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		creds := credentials.NewTLS(&tls.Config{InsecureSkipVerify: true})
 		insec, _ := cmd.Flags().GetBool("insecure")
@@ -128,7 +128,6 @@ var versionCmd = &cobra.Command{
 		return nil
 	},
 }
-
 
 func init() {
 	loginCmd.Flags().Bool("print-token", false, "")

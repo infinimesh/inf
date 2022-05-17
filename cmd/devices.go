@@ -27,9 +27,9 @@ import (
 
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	"github.com/infinimesh/infinimesh/pkg/convert"
-	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
-	devpb "github.com/infinimesh/infinimesh/pkg/node/proto/devices"
-	shadowpb "github.com/infinimesh/infinimesh/pkg/shadow/proto"
+	pb "github.com/infinimesh/proto/node"
+	devpb "github.com/infinimesh/proto/node/devices"
+	shadowpb "github.com/infinimesh/proto/shadow"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -55,15 +55,15 @@ func makeShadowServiceClient(ctx context.Context) (pb.ShadowServiceClient, error
 
 // devicesCmd represents the devices command
 var devicesCmd = &cobra.Command{
-	Use:   "devices",
-	Short: "Manage infinimesh Devices",
+	Use:     "devices",
+	Short:   "Manage infinimesh Devices",
 	Aliases: []string{"device", "dev"},
-	RunE: listDevicesCmd.RunE,
+	RunE:    listDevicesCmd.RunE,
 }
 
 var listDevicesCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List infinimesh devices",
+	Use:     "list",
+	Short:   "List infinimesh devices",
 	Aliases: []string{"ls", "l"},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := makeContextWithBearerToken()
@@ -111,8 +111,8 @@ var getDeviceCmd = &cobra.Command{
 }
 
 var makeDeviceTokenCmd = &cobra.Command{
-	Use:   "token",
-	Short: "Make device token",
+	Use:     "token",
+	Short:   "Make device token",
 	Aliases: []string{"tok", "t"},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := makeContextWithBearerToken()
@@ -124,7 +124,7 @@ var makeDeviceTokenCmd = &cobra.Command{
 		allowPost, _ := cmd.Flags().GetBool("allow-post")
 		r, err := client.MakeDevicesToken(ctx, &pb.DevicesTokenRequest{
 			Devices: args,
-			Post: allowPost,
+			Post:    allowPost,
 		})
 		if err != nil {
 			return err
@@ -140,8 +140,8 @@ var makeDeviceTokenCmd = &cobra.Command{
 }
 
 var createDeviceCmd = &cobra.Command{
-	Use:   "create",
-	Short: "Create infinimesh device",
+	Use:     "create",
+	Short:   "Create infinimesh device",
 	Aliases: []string{"add", "a", "new", "crt"},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := makeContextWithBearerToken()
@@ -157,7 +157,7 @@ var createDeviceCmd = &cobra.Command{
 		var format string
 		{
 			pathSlice := strings.Split(args[0], ".")
-			format = pathSlice[len(pathSlice) - 1]
+			format = pathSlice[len(pathSlice)-1]
 		}
 
 		template, err := os.ReadFile(args[0])
@@ -178,7 +178,7 @@ var createDeviceCmd = &cobra.Command{
 			fmt.Println("Error while parsing template")
 			return err
 		}
-		
+
 		fmt.Println("Template", string(template))
 
 		var device devpb.Device
@@ -206,7 +206,7 @@ var createDeviceCmd = &cobra.Command{
 		ns, _ := cmd.Flags().GetString("namespace")
 
 		res, err := client.Create(ctx, &devpb.CreateRequest{
-			Device: &device,
+			Device:    &device,
 			Namespace: ns,
 		})
 		if err != nil {
@@ -223,7 +223,7 @@ var mgmtDeviceStateCmd = &cobra.Command{
 	Short: "Manage device state",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := makeContextWithBearerToken()
-	
+
 		var token string
 		if t, _ := cmd.Flags().GetString("token"); t != "" {
 			token = t
@@ -234,7 +234,7 @@ var mgmtDeviceStateCmd = &cobra.Command{
 			}
 			r, err := client.MakeDevicesToken(ctx, &pb.DevicesTokenRequest{
 				Devices: args,
-				Post: true,
+				Post:    true,
 			})
 			if err != nil {
 				return err
@@ -242,7 +242,7 @@ var mgmtDeviceStateCmd = &cobra.Command{
 			token = r.Token
 		}
 
-		ctx = metadata.AppendToOutgoingContext(context.Background(), "Authorization", "Bearer " + token)
+		ctx = metadata.AppendToOutgoingContext(context.Background(), "Authorization", "Bearer "+token)
 		client, err := makeShadowServiceClient(ctx)
 		if err != nil {
 			return err
@@ -255,7 +255,7 @@ var mgmtDeviceStateCmd = &cobra.Command{
 					Data: &structpb.Struct{},
 				},
 			}
-			
+
 			err = req.Desired.Data.UnmarshalJSON([]byte(patch))
 			if err != nil {
 				return err
@@ -274,7 +274,7 @@ var mgmtDeviceStateCmd = &cobra.Command{
 					Data: &structpb.Struct{},
 				},
 			}
-			
+
 			err = req.Reported.Data.UnmarshalJSON([]byte(report))
 			if err != nil {
 				return err
@@ -293,7 +293,7 @@ var mgmtDeviceStateCmd = &cobra.Command{
 				return err
 			}
 
-			printJson, _ := cmd.Flags().GetBool("json");
+			printJson, _ := cmd.Flags().GetBool("json")
 			if !printJson {
 				fmt.Println("Streaming started")
 			}
@@ -329,7 +329,7 @@ var mgmtDeviceStateCmd = &cobra.Command{
 }
 
 var mgmtDevIceStateMQTTCmd = &cobra.Command{
-	Use: "mqtt",
+	Use:   "mqtt",
 	Short: "Manage device state via MQTT",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
@@ -368,9 +368,9 @@ var mgmtDevIceStateMQTTCmd = &cobra.Command{
 			}
 
 			opts.SetTLSConfig(&tls.Config{
-				Certificates: []tls.Certificate{cert},
-				ClientAuth: tls.NoClientCert,
-				ClientCAs: nil,
+				Certificates:       []tls.Certificate{cert},
+				ClientAuth:         tls.NoClientCert,
+				ClientCAs:          nil,
 				InsecureSkipVerify: true,
 			})
 
@@ -379,7 +379,7 @@ var mgmtDevIceStateMQTTCmd = &cobra.Command{
 			}
 			broker = "mqtts://" + broker + ":" + port
 		}
-		
+
 		opts.AddBroker(broker)
 
 		client_id, _ := cmd.Flags().GetString("client-id")
@@ -434,7 +434,7 @@ func PrintSingleDevice(d *devpb.Device) {
 func PrintSingleDeviceState(state *shadowpb.Shadow) {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
-	t.AppendRow(table.Row{ "Device", state.Device })
+	t.AppendRow(table.Row{"Device", state.Device})
 	t.AppendHeader(table.Row{"State", "Reported", "Desired"})
 
 	var reported []byte
@@ -500,7 +500,7 @@ func init() {
 	if err != nil {
 		hostname = fmt.Sprintf("infinimesh-cli-%d", os.Getpid())
 	}
-	
+
 	mgmtDevIceStateMQTTCmd.Flags().StringP("crt", "c", "", "Path to certificate file")
 	mgmtDevIceStateMQTTCmd.Flags().StringP("key", "k", "", "Path to private key file")
 	mgmtDevIceStateMQTTCmd.Flags().String("host", "", "MQTT broker Host and Port")
@@ -514,7 +514,7 @@ func init() {
 	mgmtDeviceStateCmd.Flags().BoolP("stream", "s", false, "Stream device state")
 	mgmtDeviceStateCmd.Flags().StringP("patch", "p", "", "Patch Device Desired state")
 	mgmtDeviceStateCmd.Flags().StringP("report", "r", "", "Report Device state")
-	mgmtDeviceStateCmd.Flags().StringP("token", "t",  "","Device token(new would be obtained if not present)")
+	mgmtDeviceStateCmd.Flags().StringP("token", "t", "", "Device token(new would be obtained if not present)")
 	devicesCmd.AddCommand(mgmtDeviceStateCmd)
 
 	rootCmd.AddCommand(devicesCmd)

@@ -20,8 +20,8 @@ import (
 	"crypto/tls"
 	"os"
 
-	pb "github.com/infinimesh/infinimesh/pkg/node/proto"
-	accpb "github.com/infinimesh/infinimesh/pkg/node/proto/accounts"
+	pb "github.com/infinimesh/proto/node"
+	accpb "github.com/infinimesh/proto/node/accounts"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -59,22 +59,22 @@ func makeContextWithBearerToken() context.Context {
 	if token == "" {
 		return context.Background()
 	}
-	return metadata.AppendToOutgoingContext(context.Background(), "authorization", "Bearer " + token)
+	return metadata.AppendToOutgoingContext(context.Background(), "authorization", "Bearer "+token)
 }
 
 // accountsCmd represents the accounts command
 var accountsCmd = &cobra.Command{
-	Use:   "accounts",
-	Short: "Manage infinimesh Accounts",
+	Use:     "accounts",
+	Short:   "Manage infinimesh Accounts",
 	Aliases: []string{"acc", "accs", "account"},
-	RunE: listAccountsCmd.RunE,
+	RunE:    listAccountsCmd.RunE,
 }
 
 func PrintAccountsPool(pool []*accpb.Account) {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"UUID", "Title", "Enabled", "Default NS"})
-	
+
 	rows := make([]table.Row, len(pool))
 	for i, acc := range pool {
 		rows[i] = table.Row{acc.Uuid, acc.Title, acc.Enabled, acc.DefaultNamespace}
@@ -86,12 +86,12 @@ func PrintAccountsPool(pool []*accpb.Account) {
 	})
 
 	t.AppendFooter(table.Row{"Total Found", len(pool)})
-  t.Render()
+	t.Render()
 }
 
 var listAccountsCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List infinimesh Accounts",
+	Use:     "list",
+	Short:   "List infinimesh Accounts",
 	Aliases: []string{"ls", "l"},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := makeContextWithBearerToken()
@@ -139,10 +139,10 @@ var getAccountCmd = &cobra.Command{
 }
 
 var createAccountCmd = &cobra.Command{
-	Use:   "create",
-	Short: "Create infinimesh Account",
+	Use:     "create",
+	Short:   "Create infinimesh Account",
 	Aliases: []string{"crt"},
-	Args: cobra.MinimumNArgs(4),
+	Args:    cobra.MinimumNArgs(4),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := makeContextWithBearerToken()
 		client, err := makeAccountsServiceClient(ctx)
@@ -153,13 +153,13 @@ var createAccountCmd = &cobra.Command{
 		ns := args[0]
 		uname := args[1]
 		username := args[2]
-		password := args[3]	
+		password := args[3]
 
 		enabled, _ := cmd.Flags().GetBool("enable")
 
 		r, err := client.Create(ctx, &accpb.CreateRequest{
 			Account: &accpb.Account{
-				Title: uname,
+				Title:   uname,
 				Enabled: enabled,
 			},
 			Credentials: &accpb.Credentials{
