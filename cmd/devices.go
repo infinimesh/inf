@@ -286,6 +286,28 @@ var mgmtDeviceStateCmd = &cobra.Command{
 			}
 		}
 
+		if remove, _ := cmd.Flags().GetString("remove"); remove != "" {
+			input := strings.SplitN(remove, ".", 2)
+			req := &shadowpb.RemoveRequest{
+				Device: args[0],
+			}
+			if input[0] == "reported" {
+				req.StateKey = shadowpb.StateKey_REPORTED
+			} else {
+				req.StateKey = shadowpb.StateKey_DESIRED
+			}
+
+			req.Key = input[1]
+
+			state, err := client.Remove(ctx, req)
+			if err != nil {
+				return err
+			}
+
+			PrintSingleDeviceState(state)
+			return nil
+		}
+
 		if stream, _ := cmd.Flags().GetBool("stream"); stream {
 			delta, _ := cmd.Flags().GetBool("delta")
 			c, err := client.StreamShadow(ctx, &shadowpb.StreamShadowRequest{OnlyDelta: delta})
@@ -514,6 +536,7 @@ func init() {
 	mgmtDeviceStateCmd.Flags().BoolP("stream", "s", false, "Stream device state")
 	mgmtDeviceStateCmd.Flags().StringP("patch", "p", "", "Patch Device Desired state")
 	mgmtDeviceStateCmd.Flags().StringP("report", "r", "", "Report Device state")
+	mgmtDeviceStateCmd.Flags().String("remove", "", "Remove Device state key as <reported|desired>.<key>")
 	mgmtDeviceStateCmd.Flags().StringP("token", "t", "", "Device token(new would be obtained if not present)")
 	devicesCmd.AddCommand(mgmtDeviceStateCmd)
 
