@@ -84,9 +84,17 @@ var loginCmd = &cobra.Command{
 		}
 
 		client := pb.NewAccountsServiceClient(conn)
+
+		t := "standard"
+		if ok, err := cmd.Flags().GetBool("ldap"); err != nil {
+			return err
+		} else if ok {
+			t = "ldap"
+		}
+
 		req := &pb.TokenRequest{
 			Auth: &accpb.Credentials{
-				Type: "standard", Data: []string{args[1], args[2]},
+				Type: t, Data: []string{args[1], args[2]},
 			},
 		}
 
@@ -132,6 +140,7 @@ var versionCmd = &cobra.Command{
 func init() {
 	loginCmd.Flags().Bool("print-token", false, "")
 	loginCmd.Flags().Bool("insecure", false, "Use WithInsecure instead of TLS")
+	loginCmd.Flags().Bool("ldap", false, "Use Credentials Type LDAP")
 
 	rootCmd.AddCommand(contextCmd)
 	rootCmd.AddCommand(loginCmd)
