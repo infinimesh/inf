@@ -166,6 +166,8 @@ github.com/infinimesh/proto v0.0.0-20220517220014-9da35b014803 h1:gL3/pQ6xYPq/mE
 github.com/infinimesh/proto v0.0.0-20220517220014-9da35b014803/go.mod h1:xufYx2D9SioCq9myG5QZg4UyXcG/jKIROJvwBbjG9q4=
 github.com/infinimesh/proto v0.0.0-20220628104557-2b6d8d2a4477 h1:5nXFzTxKLThhRghtEaWrhOr/1Kaae9yp++YBcq7OkUw=
 github.com/infinimesh/proto v0.0.0-20220628104557-2b6d8d2a4477/go.mod h1:uSUoHkh8XcLLbIuhFD34gzBwh6ncD3TT49A0kZuHfZI=
+github.com/infinimesh/proto v0.0.0-20220705122747-41a5f2e158ba h1:KLMY1itFHLEhVCO7cLzV/xrCfH0K1goibviFIWknHvE=
+github.com/infinimesh/proto v0.0.0-20220705122747-41a5f2e158ba/go.mod h1:uSUoHkh8XcLLbIuhFD34gzBwh6ncD3TT49A0kZuHfZI=
 github.com/jedib0t/go-pretty/v6 v6.3.1 h1:aOXiD9oqiuLH8btPQW6SfgtQN5zwhyfzZls8a6sPJ/I=
 github.com/jedib0t/go-pretty/v6 v6.3.1/go.mod h1:FMkOpgGD3EZ91cW8g/96RfxoV7bdeJyzXPYgz1L1ln0=
 github.com/jedib0t/go-pretty/v6 v6.3.3 h1:shEWoyXqldeP54byATY3IczSfMC1b/UziOISaSxcvMQ=
