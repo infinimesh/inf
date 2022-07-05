@@ -19,6 +19,7 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"os"
 
 	pb "github.com/infinimesh/proto/node"
@@ -139,6 +140,36 @@ var getAccountCmd = &cobra.Command{
 	},
 }
 
+var toggleAccountCmd = &cobra.Command{
+	Use:   "toggle [uuid]",
+	Short: "Enable or Disable infinimesh Account",
+	Args:  cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := makeContextWithBearerToken()
+		client, err := makeAccountsServiceClient(ctx)
+		if err != nil {
+			return err
+		}
+
+		r, err := client.Toggle(ctx, &accpb.Account{Uuid: args[0]})
+		if err != nil {
+			return err
+		}
+
+		if printJson, _ := cmd.Flags().GetBool("json"); printJson {
+			return printJsonResponse(map[string]bool{"enabled": r.Enabled})
+		}
+
+		if r.Enabled {
+			fmt.Println("Account is now enabled")
+		} else {
+			fmt.Println("Account is now disabled")
+		}
+
+		return nil
+	},
+}
+
 var createAccountCmd = &cobra.Command{
 	Use:   "create [namespace] [username] [login]",
 	Short: "Create infinimesh Account",
@@ -219,5 +250,7 @@ func init() {
 	accountsCmd.AddCommand(getAccountCmd)
 	accountsCmd.AddCommand(listAccountsCmd)
 	accountsCmd.AddCommand(createAccountCmd)
+	accountsCmd.AddCommand(toggleAccountCmd)
+
 	rootCmd.AddCommand(accountsCmd)
 }
