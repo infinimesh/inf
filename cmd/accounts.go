@@ -18,6 +18,7 @@ package cmd
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"os"
 
 	pb "github.com/infinimesh/proto/node"
@@ -139,10 +140,16 @@ var getAccountCmd = &cobra.Command{
 }
 
 var createAccountCmd = &cobra.Command{
-	Use:     "create",
-	Short:   "Create infinimesh Account",
+	Use:   "create [namespace] [username] [login]",
+	Short: "Create infinimesh Account",
+	Long: `Create infinimesh Account
+Args:
+	[namespace] - infinimesh Namespace UUID
+	[username] - new Account Title
+	[login] - new Account Login(part of credentials)
+`,
 	Aliases: []string{"crt"},
-	Args:    cobra.MinimumNArgs(4),
+	Args:    cobra.ExactArgs(3),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := makeContextWithBearerToken()
 		client, err := makeAccountsServiceClient(ctx)
@@ -153,20 +160,43 @@ var createAccountCmd = &cobra.Command{
 		ns := args[0]
 		uname := args[1]
 		username := args[2]
-		password := args[3]
 
 		enabled, _ := cmd.Flags().GetBool("enable")
+
+		var cred *accpb.Credentials
+		password, err := cmd.Flags().GetString("password")
+		if err != nil {
+			return err
+		}
+		if password != "" {
+			cred = &accpb.Credentials{
+				Type: "standard",
+				Data: []string{username, password},
+			}
+		}
+
+		key, err := cmd.Flags().GetString("ldap-provider-key")
+		if err != nil {
+			return err
+		}
+		if key != "" {
+			cred = &accpb.Credentials{
+				Type: "ldap",
+				Data: []string{username, key},
+			}
+		}
+
+		if cred == nil {
+			return errors.New("no Password or LDAP Provider Key given")
+		}
 
 		r, err := client.Create(ctx, &accpb.CreateRequest{
 			Account: &accpb.Account{
 				Title:   uname,
 				Enabled: enabled,
 			},
-			Credentials: &accpb.Credentials{
-				Type: "standard",
-				Data: []string{username, password},
-			},
-			Namespace: ns,
+			Credentials: cred,
+			Namespace:   ns,
 		})
 		if err != nil {
 			return err
@@ -183,6 +213,8 @@ var createAccountCmd = &cobra.Command{
 
 func init() {
 	createAccountCmd.Flags().BoolP("enable", "e", false, "Enable Account upon create")
+	createAccountCmd.Flags().String("password", "", "Account Password for standard Credentials")
+	createAccountCmd.Flags().String("ldap-provider-key", "", "LDAP Provider Key for LDAP Credentials")
 
 	accountsCmd.AddCommand(getAccountCmd)
 	accountsCmd.AddCommand(listAccountsCmd)
