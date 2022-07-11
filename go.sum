@@ -164,10 +164,14 @@ github.com/infinimesh/infinimesh v1.0.1-0.20220627205157-feae0cff767e h1:Uq06G6b
 github.com/infinimesh/infinimesh v1.0.1-0.20220627205157-feae0cff767e/go.mod h1:Equy8g1KWDP2epXk8xkmszuWCs0rnCzwHxTyLZAj+sE=
 github.com/infinimesh/proto v0.0.0-20220517220014-9da35b014803 h1:gL3/pQ6xYPq/mEt/lfJxX0+F/75NLRjUUe8RaXGQVDw=
 github.com/infinimesh/proto v0.0.0-20220517220014-9da35b014803/go.mod h1:xufYx2D9SioCq9myG5QZg4UyXcG/jKIROJvwBbjG9q4=
+github.com/infinimesh/proto v0.0.0-20220627123816-5352698fa490 h1:tDSf7A+3stHvMPcIkoQrjxt38hWIExEG4bAI3biLhS0=
+github.com/infinimesh/proto v0.0.0-20220627123816-5352698fa490/go.mod h1:uSUoHkh8XcLLbIuhFD34gzBwh6ncD3TT49A0kZuHfZI=
 github.com/infinimesh/proto v0.0.0-20220628104557-2b6d8d2a4477 h1:5nXFzTxKLThhRghtEaWrhOr/1Kaae9yp++YBcq7OkUw=
 github.com/infinimesh/proto v0.0.0-20220628104557-2b6d8d2a4477/go.mod h1:uSUoHkh8XcLLbIuhFD34gzBwh6ncD3TT49A0kZuHfZI=
 github.com/infinimesh/proto v0.0.0-20220705122747-41a5f2e158ba h1:KLMY1itFHLEhVCO7cLzV/xrCfH0K1goibviFIWknHvE=
 github.com/infinimesh/proto v0.0.0-20220705122747-41a5f2e158ba/go.mod h1:uSUoHkh8XcLLbIuhFD34gzBwh6ncD3TT49A0kZuHfZI=
+github.com/infinimesh/proto v0.0.0-20220711181452-fcbd5c231755 h1:pDpm3xr0T6EQe3iW6yo+6606iNOO9FacBswEHnai0KU=
+github.com/infinimesh/proto v0.0.0-20220711181452-fcbd5c231755/go.mod h1:uSUoHkh8XcLLbIuhFD34gzBwh6ncD3TT49A0kZuHfZI=
 github.com/jedib0t/go-pretty/v6 v6.3.1 h1:aOXiD9oqiuLH8btPQW6SfgtQN5zwhyfzZls8a6sPJ/I=
 github.com/jedib0t/go-pretty/v6 v6.3.1/go.mod h1:FMkOpgGD3EZ91cW8g/96RfxoV7bdeJyzXPYgz1L1ln0=
 github.com/jedib0t/go-pretty/v6 v6.3.3 h1:shEWoyXqldeP54byATY3IczSfMC1b/UziOISaSxcvMQ=
