@@ -27,6 +27,9 @@ builds:
         goarch: arm
       - goos: windows
         goarch: arm
+    hooks:
+      post:
+        - upx "{{ .Path }}"
 archives:
   - replacements:
       darwin: Darwin
@@ -45,15 +48,15 @@ archives:
       - README.md
       # - examples/**/*
 checksum:
-  name_template: 'checksums.txt'
+  name_template: "checksums.txt"
 snapshot:
   name_template: "{{ incpatch .Version }}-next"
 changelog:
   sort: asc
   filters:
     exclude:
-      - '^docs:'
-      - '^test:'
+      - "^docs:"
+      - "^test:"
 
 release:
   mode: keep-existing
@@ -62,8 +65,7 @@ release:
     name: inf
 
 brews:
-  -
-    name: inf
+  - name: inf
     homepage: "https://github.com/infinimesh/infinimesh"
     license: "Apache-2.0"
     description: "infinimesh Platform CLI"
@@ -102,23 +104,22 @@ nfpms:
     priority: extra
 
 aurs:
-  -
-    name: inf-bin
+  - name: inf-bin
 
     homepage: "https://github.com/infinimesh/infinimesh"
     description: "infinimesh Platform CLI"
 
     maintainers:
-      - 'Mikita Iwanowski <info@slnt-opp.xyz>'
+      - "Mikita Iwanowski <info@slnt-opp.xyz>"
 
     contributors:
-      - 'Mikita Iwanowski <info@slnt-opp.xyz>'
+      - "Mikita Iwanowski <info@slnt-opp.xyz>"
 
     license: "Apache-2.0"
 
-    private_key: '{{ .Env.AUR_KEY }}'
+    private_key: "{{ .Env.AUR_KEY }}"
 
-    git_url: 'ssh://aur@aur.archlinux.org/inf-bin.git'
+    git_url: "ssh://aur@aur.archlinux.org/inf-bin.git"
 
     commit_author:
       name: slntopp
@@ -149,4 +150,3 @@ snapcrafts:
         plugs:
           - network
           - home
-      
