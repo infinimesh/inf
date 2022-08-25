@@ -4,6 +4,7 @@ project_name: inf
 before:
   hooks:
     - go mod tidy
+
 builds:
   - id: default
     env:
@@ -21,9 +22,12 @@ builds:
     goarch:
       - amd64
       - arm64
-    hooks:
-      post:
-        - /bin/sh releaser/upx-hook.sh "{{ .Target }}" "{{ .Path }}"
+
+build:
+  hooks:
+    post:
+      - /bin/sh releaser/upx.sh
+
 archives:
   - replacements:
       darwin: Darwin
