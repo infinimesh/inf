@@ -1,7 +1,7 @@
 #!/bin/bash
 
-TARGET = $1
-BINARY = $2
+TARGET=$1
+BINARY=$2
 
 if [[ $TARGET == windows_* ]];
 then
