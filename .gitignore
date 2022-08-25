@@ -1,1 +1,10 @@
 snap.login
+dist/CHANGELOG.md
+dist/config.yaml
+dist/default_darwin_amd64_v1/inf
+dist/default_darwin_arm64/inf
+dist/default_linux_amd64_v1/inf
+dist/default_linux_arm64/inf
+dist/default_linux_arm_6/inf
+dist/default_windows_amd64_v1/inf.exe
+dist/default_windows_arm64/inf.exe
