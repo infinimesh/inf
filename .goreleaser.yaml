@@ -29,7 +29,7 @@ builds:
         goarch: arm
     hooks:
       post:
-        - releaser/upx-hook.sh "{{ .Target }}" "{{ .Path }}"
+        - /bin/sh releaser/upx-hook.sh "{{ .Target }}" "{{ .Path }}"
 archives:
   - replacements:
       darwin: Darwin
