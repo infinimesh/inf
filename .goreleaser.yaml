@@ -21,12 +21,6 @@ builds:
     goarch:
       - amd64
       - arm64
-      - arm
-    ignore:
-      - goos: darwin
-        goarch: arm
-      - goos: windows
-        goarch: arm
     hooks:
       post:
         - /bin/sh releaser/upx-hook.sh "{{ .Target }}" "{{ .Path }}"
