@@ -29,7 +29,7 @@ builds:
         goarch: arm
     hooks:
       post:
-        - if [[ "{{ .Target }}" == windows_* ]]; then echo "Not a UNIX Target, skipping..."; else upx "{{ .Path }}"; fi
+        - releaser/upx-hook.sh "{{ .Target }}" "{{ .Path }}"
 archives:
   - replacements:
       darwin: Darwin
