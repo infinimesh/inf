@@ -18,6 +18,8 @@ jobs:
         uses: samuelmeuli/action-snapcraft@v1
         with:
           snapcraft_token: ${{ secrets.SNAPCRAFT_TOKEN }}
+      - name: Install upx
+        run: sudo apt install upx -y
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
