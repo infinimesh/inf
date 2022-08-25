@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,12 +26,13 @@ import (
 )
 
 var cfgFile string
+var initialized = false
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "inf",
 	Short: "infinimesh Platform CLI",
-	RunE: contextCmd.RunE,
+	RunE:  contextCmd.RunE,
 }
 
 var VERSION string
@@ -55,6 +56,10 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	if initialized {
+		return
+	}
+	initialized = true
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
@@ -82,7 +87,7 @@ func initConfig() {
 
 	verbose, _ := rootCmd.Flags().GetBool("verbose")
 	// If a config file is found, read it in.
-	err := viper.ReadInConfig();
+	err := viper.ReadInConfig()
 	if err == nil && verbose {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
