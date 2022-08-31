@@ -155,6 +155,8 @@ github.com/infinimesh/proto v0.0.0-20220711181452-fcbd5c231755 h1:pDpm3xr0T6EQe3
 github.com/infinimesh/proto v0.0.0-20220711181452-fcbd5c231755/go.mod h1:uSUoHkh8XcLLbIuhFD34gzBwh6ncD3TT49A0kZuHfZI=
 github.com/infinimesh/proto v0.0.0-20220831201531-0cfe38d3e864 h1:Ii6jJANZgTnZ5HOfyHhl3ifbYlD67pqR1bUL273fu7g=
 github.com/infinimesh/proto v0.0.0-20220831201531-0cfe38d3e864/go.mod h1:uSUoHkh8XcLLbIuhFD34gzBwh6ncD3TT49A0kZuHfZI=
+github.com/infinimesh/proto v0.0.0-20220831205838-b5a2435b66e4 h1:p4tNt8hQYxG5U6La4d8Ara6wVUU/LFalBAfZyecI2/Q=
+github.com/infinimesh/proto v0.0.0-20220831205838-b5a2435b66e4/go.mod h1:uSUoHkh8XcLLbIuhFD34gzBwh6ncD3TT49A0kZuHfZI=
 github.com/jedib0t/go-pretty/v6 v6.3.3 h1:shEWoyXqldeP54byATY3IczSfMC1b/UziOISaSxcvMQ=
 github.com/jedib0t/go-pretty/v6 v6.3.3/go.mod h1:MgmISkTWDSFu0xOqiZ0mKNntMQ2mDgOcwOkwBEkMDJI=
 github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1:6v2b51hI/fHJwM22ozAgKL4VKDeJcHhJFhtBdhmNjmU=
