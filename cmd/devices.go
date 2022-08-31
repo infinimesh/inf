@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -310,7 +310,8 @@ var mgmtDeviceStateCmd = &cobra.Command{
 
 		if stream, _ := cmd.Flags().GetBool("stream"); stream {
 			delta, _ := cmd.Flags().GetBool("delta")
-			c, err := client.StreamShadow(ctx, &shadowpb.StreamShadowRequest{OnlyDelta: delta})
+			sync, _ := cmd.Flags().GetBool("sync")
+			c, err := client.StreamShadow(ctx, &shadowpb.StreamShadowRequest{OnlyDelta: delta, Sync: sync})
 			if err != nil {
 				return err
 			}
@@ -533,6 +534,7 @@ func init() {
 	mgmtDeviceStateCmd.AddCommand(mgmtDevIceStateMQTTCmd)
 
 	mgmtDeviceStateCmd.Flags().BoolP("delta", "d", false, "Wether to stream only delta")
+	mgmtDeviceStateCmd.Flags().Bool("sync", false, "Wether to send current state upon connection")
 	mgmtDeviceStateCmd.Flags().BoolP("stream", "s", false, "Stream device state")
 	mgmtDeviceStateCmd.Flags().StringP("patch", "p", "", "Patch Device Desired state")
 	mgmtDeviceStateCmd.Flags().StringP("report", "r", "", "Report Device state")
