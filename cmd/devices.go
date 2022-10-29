@@ -110,6 +110,41 @@ var getDeviceCmd = &cobra.Command{
 	},
 }
 
+var toggleDeviceCmd = &cobra.Command{
+	Use:   "toggle",
+	Short: "Toggle infinimesh device (enabled/disabled)",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := makeContextWithBearerToken()
+		client, err := makeDevicesServiceClient(ctx)
+		if err != nil {
+			return err
+		}
+
+		r, err := client.Get(ctx, &devpb.Device{Uuid: args[0]})
+		if err != nil {
+			return err
+		}
+
+		r.Enabled = !r.Enabled
+		r, err = client.Toggle(ctx, r)
+		if err != nil {
+			return err
+		}
+
+		if printJson, _ := cmd.Flags().GetBool("json"); printJson {
+			return printJsonResponse(r)
+		}
+
+		res := "disabled"
+		if r.Enabled {
+			res = "enabled"
+		}
+		fmt.Println("Device is now: " + res)
+
+		return nil
+	},
+}
+
 var makeDeviceTokenCmd = &cobra.Command{
 	Use:     "token",
 	Short:   "Make device token",
@@ -541,6 +576,8 @@ func init() {
 	mgmtDeviceStateCmd.Flags().String("remove", "", "Remove Device state key as <reported|desired>.<key>")
 	mgmtDeviceStateCmd.Flags().StringP("token", "t", "", "Device token(new would be obtained if not present)")
 	devicesCmd.AddCommand(mgmtDeviceStateCmd)
+
+	devicesCmd.AddCommand(toggleDeviceCmd)
 
 	rootCmd.AddCommand(devicesCmd)
 }
