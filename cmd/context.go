@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/text/cases"
@@ -94,9 +95,25 @@ var loginCmd = &cobra.Command{
 			t = "ldap"
 		}
 
+		var password string
+		if p, _ := cmd.Flags().GetString("password"); p != "" {
+			password = p
+		} else {
+
+			prompt := promptui.Prompt{
+				Label: "Password",
+				Mask:  '*',
+			}
+
+			password, err = prompt.Run()
+			if err != nil {
+				return err
+			}
+		}
+
 		req := &pb.TokenRequest{
 			Auth: &accpb.Credentials{
-				Type: t, Data: []string{args[1], args[2]},
+				Type: t, Data: []string{args[1], password},
 			},
 		}
 
@@ -140,6 +157,7 @@ var versionCmd = &cobra.Command{
 }
 
 func init() {
+	loginCmd.Flags().StringP("password", "p", "", "Password for Standard Credentials")
 	loginCmd.Flags().Bool("print-token", false, "")
 	loginCmd.Flags().Bool("insecure", false, "Use WithInsecure instead of TLS")
 	loginCmd.Flags().Bool("ldap", false, "Use Credentials Type LDAP")
