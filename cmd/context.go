@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,10 +20,11 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
@@ -60,8 +61,9 @@ var contextCmd = &cobra.Command{
 			return printJsonResponse(data)
 		}
 
+		caser := cases.Title(language.English)
 		for k, v := range data {
-			fmt.Printf("%s: %v\n", strings.Title(k), v)
+			fmt.Printf("%s: %v\n", caser.String(k), v)
 		}
 
 		return nil
