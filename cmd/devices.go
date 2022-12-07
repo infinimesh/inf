@@ -312,6 +312,7 @@ var mgmtDeviceStateCmd = &cobra.Command{
 
 			err = req.Reported.Data.UnmarshalJSON([]byte(report))
 			if err != nil {
+				fmt.Printf("Attempted Report: '%s'\n", report)
 				return err
 			}
 
