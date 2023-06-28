@@ -199,11 +199,17 @@ func PrintSessions(pool []*sessions.Session) {
 		}
 
 		rows[i] = table.Row{sess.GetId(), client, sess.GetCreated().AsTime().Format(time.RFC1123), expires}
+
+		if sess.GetCurrent() {
+			rows[i] = append(rows[i], "Current")
+		}
 	}
+
 	t.AppendRows(rows)
 
 	t.SortBy([]table.SortBy{
 		{Name: "Expires", Mode: table.Asc},
+		{Name: "Created", Mode: table.Dsc},
 	})
 
 	t.AppendFooter(table.Row{"", "", "Total Found", len(pool)})

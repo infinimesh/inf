@@ -6,7 +6,7 @@ require (
 	github.com/Pallinder/go-randomdata v1.2.0
 	github.com/eclipse/paho.mqtt.golang v1.4.2
 	github.com/infinimesh/infinimesh v1.0.1-0.20220627205157-feae0cff767e
-	github.com/infinimesh/proto v0.0.0-20230628144756-abccf694e0f8
+	github.com/infinimesh/proto v0.0.0-20230628164855-d802c118c6c2
 	github.com/jedib0t/go-pretty/v6 v6.4.6
 	github.com/manifoldco/promptui v0.9.0
 	github.com/spf13/cobra v1.7.0
