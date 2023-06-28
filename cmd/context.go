@@ -20,7 +20,10 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"os"
+	"time"
 
+	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -32,6 +35,7 @@ import (
 
 	pb "github.com/infinimesh/proto/node"
 	accpb "github.com/infinimesh/proto/node/accounts"
+	"github.com/infinimesh/proto/node/sessions"
 )
 
 func getVersion() string {
@@ -136,6 +140,68 @@ var loginCmd = &cobra.Command{
 	},
 }
 
+// make SessionsServiceClient
+func makeSessionsServiceClient(ctx context.Context) (pb.SessionsServiceClient, error) {
+	conn, err := makeConnection(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return pb.NewSessionsServiceClient(conn), nil
+}
+
+var sessionsCmd = &cobra.Command{
+	Use:   "sessions",
+	Short: "Manage Sessions",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := makeContextWithBearerToken()
+		client, err := makeSessionsServiceClient(ctx)
+		if err != nil {
+			return err
+		}
+
+		sessions, err := client.Get(ctx, &pb.EmptyMessage{})
+		if err != nil {
+			return err
+		}
+
+		if printJson, _ := cmd.Flags().GetBool("json"); printJson {
+			return printJsonResponse(sessions)
+		}
+
+		PrintSessions(sessions.GetSessions())
+		return nil
+	},
+}
+
+func PrintSessions(pool []*sessions.Session) {
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{"ID", "Client", "Created", "Expires"})
+
+	rows := make([]table.Row, len(pool))
+	for i, sess := range pool {
+		client := sess.GetClient()
+		if client == "" {
+			client = "N/A"
+		}
+
+		expires := sess.GetExpires().AsTime().Format(time.RFC1123)
+		if sess.GetExpires() == nil {
+			expires = "Never"
+		}
+
+		rows[i] = table.Row{sess.GetId(), client, sess.GetCreated().AsTime().Format(time.RFC1123), expires}
+	}
+	t.AppendRows(rows)
+
+	t.SortBy([]table.SortBy{
+		{Name: "Expires", Mode: table.Asc},
+	})
+
+	t.AppendFooter(table.Row{"", "", "Total Found", len(pool)})
+	t.Render()
+}
+
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print infinimesh CLI version",
@@ -165,4 +231,6 @@ func init() {
 	rootCmd.AddCommand(contextCmd)
 	rootCmd.AddCommand(loginCmd)
 	rootCmd.AddCommand(versionCmd)
+
+	rootCmd.AddCommand(sessionsCmd)
 }
