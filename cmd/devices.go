@@ -72,7 +72,7 @@ var listDevicesCmd = &cobra.Command{
 			return err
 		}
 
-		r, err := client.List(ctx, &pb.EmptyMessage{})
+		r, err := client.List(ctx, &pb.QueryRequest{})
 		if err != nil {
 			return err
 		}
