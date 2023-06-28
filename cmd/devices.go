@@ -72,7 +72,12 @@ var listDevicesCmd = &cobra.Command{
 			return err
 		}
 
-		r, err := client.List(ctx, &pb.QueryRequest{})
+		req := &pb.QueryRequest{}
+		if ns, err := cmd.Flags().GetString("ns"); err != nil && ns != "" {
+			req.Namespace = &ns
+		}
+
+		r, err := client.List(ctx, req)
 		if err != nil {
 			return err
 		}
@@ -545,7 +550,10 @@ func PrintDevicesPool(pool []*devpb.Device) {
 }
 
 func init() {
+
+	listDevicesCmd.Flags().String("ns", "", "Namespace to list devices from")
 	devicesCmd.AddCommand(listDevicesCmd)
+
 	devicesCmd.AddCommand(getDeviceCmd)
 
 	makeDeviceTokenCmd.Flags().Bool("allow-post", false, "Allow posting devices states")
