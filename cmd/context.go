@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"runtime"
 	"time"
 
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -115,10 +116,17 @@ var loginCmd = &cobra.Command{
 			}
 		}
 
+		hostname, err := os.Hostname()
+		if err != nil {
+			hostname = "unknown"
+		}
+
+		client_id := fmt.Sprintf("CLI | %s | %s", hostname, runtime.GOOS)
 		req := &pb.TokenRequest{
 			Auth: &accpb.Credentials{
 				Type: t, Data: []string{args[1], password},
 			},
+			Client: &client_id,
 		}
 
 		res, err := client.Token(context.Background(), req)
