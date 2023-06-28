@@ -167,24 +167,40 @@ var sessionsCmd = &cobra.Command{
 			return err
 		}
 
-		sessions, err := client.Get(ctx, &pb.EmptyMessage{})
+		sess, err := client.Get(ctx, &pb.EmptyMessage{})
 		if err != nil {
 			return err
 		}
 
-		if printJson, _ := cmd.Flags().GetBool("json"); printJson {
-			return printJsonResponse(sessions)
+		var act *sessions.Activity
+		if wa, _ := cmd.Flags().GetBool("with-activity"); wa {
+			act, err = client.GetActivity(ctx, &pb.EmptyMessage{})
+			if err != nil {
+				return err
+			}
 		}
 
-		PrintSessions(sessions.GetSessions())
+		if printJson, _ := cmd.Flags().GetBool("json"); printJson {
+			return printJsonResponse(map[string]interface{}{
+				"sessions": sess.GetSessions(),
+				"activity": act.GetLastSeen(),
+			})
+		}
+
+		PrintSessions(sess.GetSessions(), act)
 		return nil
 	},
 }
 
-func PrintSessions(pool []*sessions.Session) {
+func PrintSessions(pool []*sessions.Session, act *sessions.Activity) {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
-	t.AppendHeader(table.Row{"ID", "Client", "Created", "Expires"})
+
+	header := []interface{}{"ID", "Client", "Created", "Expires"}
+	if act != nil {
+		header = append(header, "Last Seen")
+	}
+	t.AppendHeader(header)
 
 	rows := make([]table.Row, len(pool))
 	for i, sess := range pool {
@@ -199,6 +215,15 @@ func PrintSessions(pool []*sessions.Session) {
 		}
 
 		rows[i] = table.Row{sess.GetId(), client, sess.GetCreated().AsTime().Format(time.RFC1123), expires}
+
+		if act != nil {
+			last_seen := "Never"
+			if ts, ok := act.GetLastSeen()[sess.GetId()]; ok {
+				last_seen = ts.AsTime().Format(time.RFC1123)
+			}
+
+			rows[i] = append(rows[i], last_seen)
+		}
 
 		if sess.GetCurrent() {
 			rows[i] = append(rows[i], "Current")
@@ -246,5 +271,6 @@ func init() {
 	rootCmd.AddCommand(loginCmd)
 	rootCmd.AddCommand(versionCmd)
 
+	sessionsCmd.Flags().BoolP("with-activity", "a", false, "Show Activity")
 	rootCmd.AddCommand(sessionsCmd)
 }
