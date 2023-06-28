@@ -192,6 +192,31 @@ var sessionsCmd = &cobra.Command{
 	},
 }
 
+var sessionRevokeCmd = &cobra.Command{
+	Use: "revoke [...sid]",
+	Aliases: []string{
+		"delete",
+		"remove",
+	},
+	Short: "Revoke the Session(s)",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := makeContextWithBearerToken()
+		client, err := makeSessionsServiceClient(ctx)
+		if err != nil {
+			return err
+		}
+
+		for _, sid := range args {
+			_, err = client.Revoke(ctx, &sessions.Session{Id: sid})
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	},
+}
+
 func PrintSessions(pool []*sessions.Session, act *sessions.Activity) {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
@@ -270,6 +295,8 @@ func init() {
 	rootCmd.AddCommand(contextCmd)
 	rootCmd.AddCommand(loginCmd)
 	rootCmd.AddCommand(versionCmd)
+
+	sessionsCmd.AddCommand(sessionRevokeCmd)
 
 	sessionsCmd.Flags().BoolP("with-activity", "a", false, "Show Activity")
 	rootCmd.AddCommand(sessionsCmd)
