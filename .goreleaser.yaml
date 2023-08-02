@@ -22,20 +22,16 @@ builds:
     goarch:
       - amd64
       - arm64
-
-build:
-  hooks:
-    post:
-      - /bin/sh releaser/upx.sh
+    hooks:
+      post:
+        - /bin/sh releaser/upx.sh
 
 archives:
-  - replacements:
-      darwin: Darwin
-      linux: Linux
-      windows: Windows
-      386: i386
-      amd64: x86_64
-    name_template: "inf_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+  - name_template: >-
+      inf_{{ .Version}}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else }}{{ .Arch }}{{ end }}
     builds:
       - default
     format_overrides:
@@ -68,7 +64,7 @@ brews:
     license: "Apache-2.0"
     description: "infinimesh Platform CLI"
     caveats: "Start with inf help login ;)"
-    tap:
+    repository:
       owner: infinimesh
       name: homebrew-inf
     commit_author:
@@ -84,11 +80,6 @@ nfpms:
     file_name_template: "{{ .ConventionalFileName }}"
     builds:
       - default
-    replacements:
-      amd64: 64-bit
-      386: 32-bit
-      darwin: macOS
-      linux: Tux
 
     formats:
       - deb
@@ -126,12 +117,11 @@ aurs:
 snapcrafts:
   - builds:
       - default
-    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-    replacements:
-      amd64: 64-bit
-      386: 32-bit
-      darwin: macOS
-      linux: Tux
+    name_template: >-
+      inf_{{ .Version}}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else }}{{ .Arch }}{{ end }}
 
     name: infinimesh
     publish: true
