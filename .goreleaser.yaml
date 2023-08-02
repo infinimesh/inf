@@ -22,9 +22,16 @@ builds:
     goarch:
       - amd64
       - arm64
-    hooks:
-      post:
-        - /bin/sh releaser/upx.sh
+
+upx:
+  - enabled: true
+    ids: [default]
+    goos: [linux, darwin]
+    goarch:
+      - linux
+      - darwin
+    
+    compress: best
 
 archives:
   - name_template: >-
