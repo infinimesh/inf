@@ -23,7 +23,7 @@ jobs:
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
         with:
-          version: ${{ env.GITHUB_REF_NAME }}
+          version: ${{ github.ref_name  }}
           args: release --rm-dist
         env:
           GITHUB_TOKEN: ${{ secrets.PUBLISHER_TOKEN }}
