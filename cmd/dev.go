@@ -19,7 +19,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"net/url"
 	"strings"
 
 	"github.com/Pallinder/go-randomdata"
@@ -56,6 +55,16 @@ var genUIPluginUrlCmd = &cobra.Command{
 		}
 
 		api, _ := cmd.Flags().GetString("api")
+		if api == "" {
+			if g := viper.GetString("infinimesh"); g != "" {
+				api = strings.Split(g, ":")[0]
+				if !viper.GetBool("insecure") {
+					api = "https://" + api
+				} else {
+					api = "http://" + api
+				}
+			}
+		}
 		params["api"] = api
 
 		token, _ := cmd.Flags().GetString("token")
@@ -120,26 +129,11 @@ var genUIPluginUrlCmd = &cobra.Command{
 
 func init() {
 
-	initConfig()
-
-	api := &url.URL{
-		Scheme: "http",
-		Host:   "api.infinimesh.local",
-	}
-
-	if g := viper.GetString("infinimesh"); g != "" {
-		if !viper.GetBool("insecure") {
-			api.Scheme = "https"
-		}
-
-		api.Host = strings.Split(g, ":")[0]
-	}
-
 	genUIPluginUrlCmd.Flags().String("token", "", "Token to encode into URL (defaults to CLI stored auth)")
 	genUIPluginUrlCmd.Flags().String("title", randomdata.SillyName(), "User Title to encode (defaults to random)")
 	genUIPluginUrlCmd.Flags().String("namespace", "infinimesh", "Namespace to encode")
 	genUIPluginUrlCmd.Flags().Bool("light", false, "Wether to encode Light theme (Dark is used by default)")
-	genUIPluginUrlCmd.Flags().String("api", api.String(), "infinimesh REST API Base URL to use")
+	genUIPluginUrlCmd.Flags().String("api", "", "infinimesh REST API Base URL to use (default: hostname from infinimesh context)")
 	genUIPluginUrlCmd.Flags().Bool("url-only", false, "Print resulting URL only")
 
 	devCmd.AddCommand(genUIPluginUrlCmd)

@@ -33,6 +33,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
+	"gopkg.in/yaml.v2"
 
 	pb "github.com/infinimesh/proto/node"
 	accpb "github.com/infinimesh/proto/node/accounts"
@@ -41,6 +42,10 @@ import (
 
 func getVersion() string {
 	return VERSION
+}
+
+type ContextConf struct {
+	Selected string `yaml:"selected"`
 }
 
 // contextCmd represents the context command
@@ -63,6 +68,10 @@ var contextCmd = &cobra.Command{
 			data["insecure"] = insec
 		}
 
+		if viper.GetString("context") != "" {
+			data["context"] = viper.GetString("context")
+		}
+
 		if printJson, _ := cmd.Flags().GetBool("json"); printJson {
 			return printJsonResponse(data)
 		}
@@ -76,9 +85,35 @@ var contextCmd = &cobra.Command{
 	},
 }
 
+var setContextCmd = &cobra.Command{
+	Use:   "set-context <context>",
+	Short: "Set infinimesh CLI Context",
+	Args:  cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		home, err := os.UserHomeDir()
+		cobra.CheckErr(err)
+
+		profilesCfg := fmt.Sprintf("%s/.infinimesh.contexts", home)
+
+		if _, err := os.Stat(profilesCfg); os.IsNotExist(err) {
+			if _, err := os.Create(profilesCfg); err != nil { // perm 0666
+				fmt.Fprintln(os.Stderr, "Can't create default contexts config file")
+				panic(err)
+			}
+		}
+
+		contexts := ContextConf{
+			Selected: args[0],
+		}
+		r, _ := yaml.Marshal(contexts)
+		return os.WriteFile(profilesCfg, r, 0640)
+	},
+}
+
 var loginCmd = &cobra.Command{
-	Use:     "login",
+	Use:     "login <host:port> <login>",
 	Aliases: []string{"l", "auth", "a"},
+	Args:    cobra.ExactArgs(2),
 	Short:   "Authorize in infinimesh and store credentials",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		creds := credentials.NewTLS(&tls.Config{InsecureSkipVerify: true})
@@ -139,9 +174,15 @@ var loginCmd = &cobra.Command{
 			fmt.Println(token)
 		}
 
+		infContext := "default"
+		if ctx, _ := cmd.Flags().GetString("context"); ctx != "" {
+			infContext = ctx
+		}
+
 		viper.Set("infinimesh", args[0])
 		viper.Set("token", token)
 		viper.Set("insecure", insec)
+		viper.Set("context", infContext)
 
 		err = viper.WriteConfig()
 		return err
@@ -293,6 +334,7 @@ func init() {
 	loginCmd.Flags().Bool("ldap", false, "Use Credentials Type LDAP")
 
 	rootCmd.AddCommand(contextCmd)
+	rootCmd.AddCommand(setContextCmd)
 	rootCmd.AddCommand(loginCmd)
 	rootCmd.AddCommand(versionCmd)
 
