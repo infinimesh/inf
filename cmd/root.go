@@ -26,6 +26,7 @@ import (
 )
 
 var cfgFile string
+var profile string
 var initialized = false
 
 // rootCmd represents the base command when called without any subcommands
@@ -50,6 +51,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.default.infinimesh.yaml)")
+	rootCmd.PersistentFlags().StringVar(&profile, "profile", "", "Use a specific config profile (default is default)")
 	rootCmd.PersistentFlags().Bool("json", false, "Print output as json")
 	rootCmd.PersistentFlags().Bool("verbose", false, "Print additional info related to the CLI itself")
 }
@@ -64,16 +66,7 @@ func initConfig() {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Find home directory.
-		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
-
-		// Search config in home directory with name ".inf" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigType("yaml")
-		viper.SetConfigName(".default.infinimesh")
-
-		cfgFile = fmt.Sprintf("%s/.default.infinimesh.yaml", home)
+		loadProfile()
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
@@ -89,8 +82,28 @@ func initConfig() {
 	// If a config file is found, read it in.
 	err := viper.ReadInConfig()
 	if err == nil && verbose {
+		fmt.Println("Using profile: ", profile)
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+}
+
+func loadProfile() {
+	if profile == "" {
+		profile = "default"
+	}
+
+	home, err := os.UserHomeDir()
+	cobra.CheckErr(err)
+
+	// Search config in home directory with name ".inf" (without extension).
+	viper.AddConfigPath(home)
+	viper.SetConfigType("yaml")
+
+	config_name := fmt.Sprintf(".%s.infinimesh", profile)
+
+	viper.SetConfigName(config_name)
+
+	cfgFile = fmt.Sprintf("%s/.default.infinimesh.yaml", home)
 }
 
 func printJsonResponse(data interface{}) error {
