@@ -233,20 +233,23 @@ var createDeviceCmd = &cobra.Command{
 			return err
 		}
 
-		certPath, _ := cmd.Flags().GetString("crt")
-		if _, err := os.Stat(certPath); os.IsNotExist(err) {
-			return errors.New("Certificate doesn't exist at path " + certPath)
-		}
-		pem, err := os.ReadFile(certPath)
-		if err != nil {
-			fmt.Println("Error while reading certificate")
-			return err
-		}
+		soft, _ := cmd.Flags().GetBool("soft")
+		if !soft {
+			certPath, _ := cmd.Flags().GetString("crt")
+			if _, err := os.Stat(certPath); os.IsNotExist(err) {
+				return errors.New("Certificate doesn't exist at path " + certPath)
+			}
+			pem, err := os.ReadFile(certPath)
+			if err != nil {
+				fmt.Println("Error while reading certificate")
+				return err
+			}
 
-		cert := &devpb.Certificate{
-			PemData: string(pem),
+			cert := &devpb.Certificate{
+				PemData: string(pem),
+			}
+			device.Certificate = cert
 		}
-		device.Certificate = cert
 
 		ns, _ := cmd.Flags().GetString("namespace")
 
