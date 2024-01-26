@@ -140,9 +140,15 @@ var loginCmd = &cobra.Command{
 			fmt.Println(token)
 		}
 
+		infContext := "default"
+		if ctx, _ := cmd.Flags().GetString("context"); ctx != "" {
+			infContext = ctx
+		}
+
 		viper.Set("infinimesh", args[0])
 		viper.Set("token", token)
 		viper.Set("insecure", insec)
+		viper.Set("context", infContext)
 
 		err = viper.WriteConfig()
 		return err
