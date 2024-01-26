@@ -63,6 +63,10 @@ var contextCmd = &cobra.Command{
 			data["insecure"] = insec
 		}
 
+		if viper.GetString("context") != "" {
+			data["context"] = viper.GetString("context")
+		}
+
 		if printJson, _ := cmd.Flags().GetBool("json"); printJson {
 			return printJsonResponse(data)
 		}
