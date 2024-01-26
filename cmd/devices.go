@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/infinimesh/proto/node/access"
 	"os"
 	"strings"
 
@@ -161,10 +162,14 @@ var makeDeviceTokenCmd = &cobra.Command{
 			return err
 		}
 
-		allowPost, _ := cmd.Flags().GetBool("allow-post")
+		var devices = make(map[string]access.Level, len(args))
+
+		for _, arg := range args {
+			devices[arg] = access.Level_NONE
+		}
+
 		r, err := client.MakeDevicesToken(ctx, &pb.DevicesTokenRequest{
-			Devices: args,
-			Post:    allowPost,
+			Devices: devices,
 		})
 		if err != nil {
 			return err
@@ -272,10 +277,17 @@ var mgmtDeviceStateCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
+
+			var devices = make(map[string]access.Level, len(args))
+
+			for _, arg := range args {
+				devices[arg] = access.Level_NONE
+			}
+
 			r, err := client.MakeDevicesToken(ctx, &pb.DevicesTokenRequest{
-				Devices: args,
-				Post:    true,
+				Devices: devices,
 			})
+
 			if err != nil {
 				return err
 			}
