@@ -62,7 +62,7 @@ func initConfig() {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		loadProfile()
+		loadContext()
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
@@ -76,8 +76,8 @@ func initConfig() {
 	}
 }
 
-func loadProfile() {
-	checkProfile()
+func loadContext() {
+	checkContext()
 
 	home, err := os.UserHomeDir()
 	cobra.CheckErr(err)
@@ -100,7 +100,7 @@ func loadProfile() {
 	}
 }
 
-func checkProfile() {
+func checkContext() {
 	if infContext != "" {
 		return
 	}
@@ -118,9 +118,7 @@ func checkProfile() {
 		}
 	}
 
-	contexts := struct {
-		Selected string `yaml:"selected"`
-	}{
+	contexts := ContextConf{
 		Selected: "default",
 	}
 	profilesBytes, err := os.ReadFile(profilesCfg)
