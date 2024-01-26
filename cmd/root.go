@@ -27,7 +27,7 @@ import (
 )
 
 var cfgFile string
-var profile string
+var infContext string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -49,7 +49,7 @@ func Execute() {
 
 func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.default.infinimesh.yaml)")
-	rootCmd.PersistentFlags().StringVar(&profile, "profile", "", "Use a specific config profile (default is default)")
+	rootCmd.PersistentFlags().StringVar(&infContext, "context", "", "Use a specific config context (default is default)")
 	rootCmd.PersistentFlags().Bool("json", false, "Print output as json")
 	rootCmd.PersistentFlags().Bool("verbose", false, "Print additional info related to the CLI itself")
 
@@ -71,7 +71,7 @@ func initConfig() {
 	// If a config file is found, read it in.
 	err := viper.ReadInConfig()
 	if err == nil && verbose {
-		fmt.Println("Using profile: ", profile)
+		fmt.Println("Using context: ", infContext)
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
 }
@@ -86,7 +86,7 @@ func loadProfile() {
 	viper.AddConfigPath(home)
 	viper.SetConfigType("yaml")
 
-	config_name := fmt.Sprintf(".%s.infinimesh", profile)
+	config_name := fmt.Sprintf(".%s.infinimesh", infContext)
 
 	viper.SetConfigName(config_name)
 
@@ -101,7 +101,7 @@ func loadProfile() {
 }
 
 func checkProfile() {
-	if profile != "" {
+	if infContext != "" {
 		return
 	}
 
@@ -109,16 +109,16 @@ func checkProfile() {
 	cobra.CheckErr(err)
 
 	faulty_conf := false
-	profilesCfg := fmt.Sprintf("%s/.infinimesh.profiles", home)
+	profilesCfg := fmt.Sprintf("%s/.infinimesh.contexts", home)
 	if _, err := os.Stat(profilesCfg); os.IsNotExist(err) {
 		faulty_conf = true
 		if _, err := os.Create(profilesCfg); err != nil { // perm 0666
-			fmt.Fprintln(os.Stderr, "Can't create default profiles config file")
+			fmt.Fprintln(os.Stderr, "Can't create default contexts config file")
 			panic(err)
 		}
 	}
 
-	profiles := struct {
+	contexts := struct {
 		Selected string `yaml:"selected"`
 	}{
 		Selected: "default",
@@ -128,15 +128,15 @@ func checkProfile() {
 		faulty_conf = true
 	}
 	if err == nil {
-		if yaml.Unmarshal(profilesBytes, &profiles) != nil {
+		if yaml.Unmarshal(profilesBytes, &contexts) != nil {
 			faulty_conf = true
 		}
 	}
 
-	profile = profiles.Selected
+	infContext = contexts.Selected
 
 	if faulty_conf {
-		r, _ := yaml.Marshal(profiles)
+		r, _ := yaml.Marshal(contexts)
 		os.WriteFile(profilesCfg, r, 0640)
 	}
 }
