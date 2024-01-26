@@ -27,7 +27,6 @@ import (
 
 var cfgFile string
 var profile string
-var initialized = false
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -48,20 +47,16 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
-
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.default.infinimesh.yaml)")
-	rootCmd.PersistentFlags().StringVar(&profile, "profile", "", "Use a specific config profile (default is default)")
+	rootCmd.PersistentFlags().StringVar(&profile, "profile", "default", "Use a specific config profile (default is default)")
 	rootCmd.PersistentFlags().Bool("json", false, "Print output as json")
 	rootCmd.PersistentFlags().Bool("verbose", false, "Print additional info related to the CLI itself")
+
+	cobra.OnInitialize(initConfig)
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if initialized {
-		return
-	}
-	initialized = true
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
@@ -70,13 +65,6 @@ func initConfig() {
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
-
-	if _, err := os.Stat(cfgFile); os.IsNotExist(err) {
-		if _, err := os.Create(cfgFile); err != nil { // perm 0666
-			fmt.Fprintln(os.Stderr, "Can't create default config file")
-			panic(err)
-		}
-	}
 
 	verbose, _ := rootCmd.Flags().GetBool("verbose")
 	// If a config file is found, read it in.
@@ -103,7 +91,14 @@ func loadProfile() {
 
 	viper.SetConfigName(config_name)
 
-	cfgFile = fmt.Sprintf("%s/.default.infinimesh.yaml", home)
+	cfgFile = fmt.Sprintf("%s/%s.yaml", home, config_name)
+
+	if _, err := os.Stat(cfgFile); os.IsNotExist(err) {
+		if _, err := os.Create(cfgFile); err != nil { // perm 0666
+			fmt.Fprintln(os.Stderr, "Can't create default config file")
+			panic(err)
+		}
+	}
 }
 
 func printJsonResponse(data interface{}) error {
