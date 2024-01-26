@@ -16,8 +16,14 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '1.20'
+      
       - name: Install Snapcraft
         uses: samuelmeuli/action-snapcraft@v2
+      - name: Spancraft parallelism hack
+        run: |
+          mkdir -p /home/runner/.cache/snapcraft/download
+          mkdir -p /home/runner/.cache/snapcraft/stage-packages
+
       - name: Install upx
         run: sudo apt install upx -y
       - name: Run GoReleaser
