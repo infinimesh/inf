@@ -22,9 +22,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/infinimesh/proto/node/access"
 	"os"
 	"strings"
+
+	"github.com/infinimesh/proto/node/access"
 
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	"github.com/infinimesh/infinimesh/pkg/convert"
@@ -185,9 +186,10 @@ var makeDeviceTokenCmd = &cobra.Command{
 }
 
 var createDeviceCmd = &cobra.Command{
-	Use:     "create",
+	Use:     "create <template.[json|yaml]>",
 	Short:   "Create infinimesh device",
 	Aliases: []string{"add", "a", "new", "crt"},
+	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := makeContextWithBearerToken()
 		client, err := makeDevicesServiceClient(ctx)
@@ -233,20 +235,23 @@ var createDeviceCmd = &cobra.Command{
 			return err
 		}
 
-		certPath, _ := cmd.Flags().GetString("crt")
-		if _, err := os.Stat(certPath); os.IsNotExist(err) {
-			return errors.New("Certificate doesn't exist at path " + certPath)
-		}
-		pem, err := os.ReadFile(certPath)
-		if err != nil {
-			fmt.Println("Error while reading certificate")
-			return err
-		}
+		soft, _ := cmd.Flags().GetBool("soft")
+		if !soft {
+			certPath, _ := cmd.Flags().GetString("crt")
+			if _, err := os.Stat(certPath); os.IsNotExist(err) {
+				return errors.New("Certificate doesn't exist at path " + certPath)
+			}
+			pem, err := os.ReadFile(certPath)
+			if err != nil {
+				fmt.Println("Error while reading certificate")
+				return err
+			}
 
-		cert := &devpb.Certificate{
-			PemData: string(pem),
+			cert := &devpb.Certificate{
+				PemData: string(pem),
+			}
+			device.Certificate = cert
 		}
-		device.Certificate = cert
 
 		ns, _ := cmd.Flags().GetString("namespace")
 
@@ -573,6 +578,7 @@ func init() {
 
 	createDeviceCmd.Flags().String("crt", "", "Path to certificate file")
 	createDeviceCmd.Flags().StringP("namespace", "n", "", "Namespace to create device in")
+	createDeviceCmd.Flags().Bool("soft", false, "Create device without certificate")
 	devicesCmd.AddCommand(createDeviceCmd)
 
 	hostname, err := os.Hostname()
