@@ -77,8 +77,9 @@ var contextCmd = &cobra.Command{
 }
 
 var loginCmd = &cobra.Command{
-	Use:     "login",
+	Use:     "login <host:port> <login>",
 	Aliases: []string{"l", "auth", "a"},
+	Args:    cobra.ExactArgs(2),
 	Short:   "Authorize in infinimesh and store credentials",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		creds := credentials.NewTLS(&tls.Config{InsecureSkipVerify: true})
