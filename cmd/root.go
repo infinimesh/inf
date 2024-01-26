@@ -21,6 +21,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 
 	"github.com/spf13/viper"
 )
@@ -48,7 +49,7 @@ func Execute() {
 
 func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.default.infinimesh.yaml)")
-	rootCmd.PersistentFlags().StringVar(&profile, "profile", "default", "Use a specific config profile (default is default)")
+	rootCmd.PersistentFlags().StringVar(&profile, "profile", "", "Use a specific config profile (default is default)")
 	rootCmd.PersistentFlags().Bool("json", false, "Print output as json")
 	rootCmd.PersistentFlags().Bool("verbose", false, "Print additional info related to the CLI itself")
 
@@ -76,9 +77,7 @@ func initConfig() {
 }
 
 func loadProfile() {
-	if profile == "" {
-		profile = "default"
-	}
+	checkProfile()
 
 	home, err := os.UserHomeDir()
 	cobra.CheckErr(err)
@@ -98,6 +97,47 @@ func loadProfile() {
 			fmt.Fprintln(os.Stderr, "Can't create default config file")
 			panic(err)
 		}
+	}
+}
+
+func checkProfile() {
+	if profile != "" {
+		return
+	}
+
+	home, err := os.UserHomeDir()
+	cobra.CheckErr(err)
+
+	faulty_conf := false
+	profilesCfg := fmt.Sprintf("%s/.infinimesh.profiles", home)
+	if _, err := os.Stat(profilesCfg); os.IsNotExist(err) {
+		faulty_conf = true
+		if _, err := os.Create(profilesCfg); err != nil { // perm 0666
+			fmt.Fprintln(os.Stderr, "Can't create default profiles config file")
+			panic(err)
+		}
+	}
+
+	profiles := struct {
+		Selected string `yaml:"selected"`
+	}{
+		Selected: "default",
+	}
+	profilesBytes, err := os.ReadFile(profilesCfg)
+	if err != nil || len(profilesBytes) == 0 {
+		faulty_conf = true
+	}
+	if err == nil {
+		if yaml.Unmarshal(profilesBytes, &profiles) != nil {
+			faulty_conf = true
+		}
+	}
+
+	profile = profiles.Selected
+
+	if faulty_conf {
+		r, _ := yaml.Marshal(profiles)
+		os.WriteFile(profilesCfg, r, 0640)
 	}
 }
 
