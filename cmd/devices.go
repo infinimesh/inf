@@ -154,8 +154,15 @@ var toggleDeviceCmd = &cobra.Command{
 }
 
 var patchConfigDeviceCmd = &cobra.Command{
-	Use:   "config",
+	Use:   "config <uuid> <template.[json|yaml]>",
 	Short: "Patch config infinimesh device",
+	Args: cobra.MatchAll(cobra.ExactArgs(2), func(cmd *cobra.Command, args []string) error {
+		if len(args[0]) != 36 {
+			return errors.New("Uuid is not correct.")
+		}
+
+		return nil
+	}),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := makeContextWithBearerToken()
 		client, err := makeDevicesServiceClient(ctx)
