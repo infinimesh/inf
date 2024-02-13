@@ -23,6 +23,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/infinimesh/proto/node/access"
@@ -147,6 +148,58 @@ var toggleDeviceCmd = &cobra.Command{
 			res = "enabled"
 		}
 		fmt.Println("Device is now: " + res)
+
+		return nil
+	},
+}
+
+var patchConfigDeviceCmd = &cobra.Command{
+	Use:   "config <uuid> <template.[json|yaml]>",
+	Short: "Patch config infinimesh device",
+	Args: cobra.MatchAll(cobra.ExactArgs(2), func(cmd *cobra.Command, args []string) error {
+		if len(args[0]) != 36 {
+			return errors.New("Uuid is not correct.")
+		}
+
+		return nil
+	}),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := makeContextWithBearerToken()
+		client, err := makeDevicesServiceClient(ctx)
+		if err != nil {
+			return err
+		}
+
+		template, err := os.ReadFile(args[1])
+		if err != nil {
+			fmt.Println("Error while reading template")
+			return err
+		}
+
+		var format string = filepath.Ext(args[1])
+
+		switch format {
+		case ".json":
+		case ".yml", ".yaml":
+			template, err = convert.ConvertBytes(template)
+		default:
+			return errors.New("Unsupported template format " + format)
+		}
+
+		var device devpb.Device
+		err = json.Unmarshal(template, &device)
+
+		device.Uuid = args[0]
+
+		response, err := client.PatchConfig(ctx, &device)
+
+		if err != nil {
+			return err
+		}
+
+		if printJson, _ := cmd.Flags().GetBool("json"); printJson {
+			return printJsonResponse(response)
+		}
 
 		return nil
 	},
@@ -605,6 +658,7 @@ func init() {
 	devicesCmd.AddCommand(mgmtDeviceStateCmd)
 
 	devicesCmd.AddCommand(toggleDeviceCmd)
+	devicesCmd.AddCommand(patchConfigDeviceCmd)
 
 	rootCmd.AddCommand(devicesCmd)
 }
